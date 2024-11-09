@@ -5,7 +5,7 @@ const cors = require('cors');
 const morgan = require("morgan")
 const taskRoutes = require('./routes/tasks.routes.js')
 const corsOptions = {
-    origin: 'http://localhost:5173', // Aquí pones la URL de tu frontend
+    origin: '*', // Aquí pones la URL de tu frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Cabeceras permitidas
 };
