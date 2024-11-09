@@ -28,9 +28,14 @@ const {
     eliminarPedido,
     asignarPermiso,
     permisosxtipousuario,
-    quitarPermiso
+    quitarPermiso,
 
-
+    crearMensaje,
+    pedidosXusuario,
+    pedidoscodigo,
+    mensajesXremitente,
+    mensajesXdestinatario,
+    mensajesXpedido
 
 
 } = require('../controllers/tasks.controllers')
@@ -61,6 +66,13 @@ router.delete('/pedidos/:id', eliminarPedido)
 router.post('/asignarpermiso', asignarPermiso)
 router.get('/permisosxtipousuario/:id', permisosxtipousuario)
 router.delete('/quitarpermiso/:id', quitarPermiso)
+
+router.get('/mensajesXremitente/:id', mensajesXremitente)
+router.get('/mensajesXremitente/:id', mensajesXdestinatario)
+router.get('/pedidosXusuario/:id', pedidosXusuario)
+router.get('pedidos/:id', pedidoscodigo)
+router.post('/mensajes', crearMensaje)
+router.get('/mensajesXpedido/:id', mensajesXpedido)
 module.exports = router;
 
 // fw4h0IvMUMhNLaCO contraselña de la base de datos

@@ -558,6 +558,146 @@ const quitarPermiso = async (req, res, next) => {
         next(error);
     }
 };
+
+
+
+
+const pedidosXusuario = async (req, res, next) => {
+
+    try {
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=u.id_usuario')
+
+        res.json(allTasks.rows)
+    } catch (error) {
+
+        next(error)
+    }
+
+}
+
+const mensajesXremitente = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        id
+    } = req.params; // Ahora estás usando el parámetro de la URL
+
+    console.log(id); // Verifica que estás recibiendo el ID correcto
+
+    try {
+        const result = await pool.query("SELECT * FROM Mensajes WHERE id_remitente = $1", [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        res.json(result.rows[0]); // Devuelve el primer resultado encontrado
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
+
+const crearMensaje = async (req, res, next) => {
+    const {
+
+        id_pedido,
+        id_remitente,
+        id_destinatario,
+        contenido,
+    } = req.body
+    try {
+        // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
+        const remitente = await pool.query("SELECT * FROM Usuarios WHERE id_tipo_usuario = $1", [id_remitente]);
+        const destinatario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_destinatario]);
+        const pedido = await pool.query("SELECT * FROM Pedidos WHERE id_pedido = $1", [id_pedido]);
+
+        if (remitente.rows.length === 0 && destinatario.rows.length === 0 && pedido.rows.length === 0) {
+            return res.status(400).json({
+                message: 'El tipo de usuario especificado no existe.'
+            });
+        }
+
+        // Si existe, procede con la inserción
+        const result = await pool.query(
+            "INSERT INTO Mensajes (id_pedido, id_remitente, id_destinatario, contenido) VALUES ($1, $2, $3, $4) RETURNING *",
+            [id_pedido, id_remitente, id_destinatario, contenido]
+        );
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        next(error);
+    }
+}
+const pedidoscodigo = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        codigo_pedido
+    } = req.params; // Ahora estás usando el parámetro de la URL
+
+    console.log(id); // Verifica que estás recibiendo el ID correcto
+
+    try {
+        const result = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        res.json(result.rows[0]); // Devuelve el primer resultado encontrado
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
+
+const mensajesXpedido = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        id
+    } = req.params; // Ahora estás usando el parámetro de la URL
+
+    console.log(id); // Verifica que estás recibiendo el ID correcto
+
+    try {
+        const result = await pool.query("SELECT * FROM Mensajes WHERE id_pedido= $1", [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        res.json(result.rows); // Devuelve el primer resultado encontrado
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
+
+const mensajesXdestinatario = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        id
+    } = req.params; // Ahora estás usando el parámetro de la URL
+
+    console.log(id); // Verifica que estás recibiendo el ID correcto
+
+    try {
+        const result = await pool.query("SELECT * FROM Mensajes WHERE id_destinatario = $1", [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        res.json(result.rows[0]); // Devuelve el primer resultado encontrado
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
+
 module.exports = {
     creartipoUsuario,
     obtenertipoUsuarios,
@@ -581,8 +721,13 @@ module.exports = {
     eliminarPedido,
     asignarPermiso,
     permisosxtipousuario,
-    quitarPermiso
+    quitarPermiso,
 
-
+    pedidosXusuario,
+    pedidoscodigo,
+    crearMensaje,
+    mensajesXpedido,
+    mensajesXdestinatario,
+    mensajesXremitente
 
 }
