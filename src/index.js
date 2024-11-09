@@ -8,8 +8,11 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use(taskRoutes)
 app.listen(4000)
-
-app.use(cors());
+const corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 
 app.use((err, req, res, next) => {
     res.status(404).json({
