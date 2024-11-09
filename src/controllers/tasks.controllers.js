@@ -698,6 +698,51 @@ const mensajesXdestinatario = async (req, res, next) => {
     }
 };
 
+const verificarUsuario = async () => {
+    const {
+        correo,
+        contraseña
+    } = req.body;
+
+    try {
+        // Buscar el usuario por correo
+        const result = await pool.query(
+            'SELECT id_usuario,id_tipo_usuario,id nombre, correo, contraseña FROM Usuarios WHERE correo = $1',
+            [correo]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            });
+        }
+
+        const usuario = result.rows[0];
+
+        if (usuario.contraseña === contraseña) {
+            return res.json({
+                success: true,
+                usuario: {
+                    id: usuario.id_usuario,
+                    nombre: usuario.nombre,
+                    correo: usuario.correo,
+                    id_tipo_usuario: usuario.id_tipo_usuario
+                }
+            });
+        } else {
+            return res.status(401).json({
+                message: 'Contraseña incorrecta'
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: 'Error al verificar el usuario'
+        });
+    }
+};
+
+
 module.exports = {
     creartipoUsuario,
     obtenertipoUsuarios,
@@ -728,6 +773,7 @@ module.exports = {
     crearMensaje,
     mensajesXpedido,
     mensajesXdestinatario,
-    mensajesXremitente
+    mensajesXremitente,
+    verificarUsuario,
 
 }
