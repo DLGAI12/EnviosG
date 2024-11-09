@@ -697,20 +697,20 @@ const mensajesXdestinatario = async (req, res, next) => {
         next(error); // Maneja el error
     }
 };
-
-const verificarUsuario = async () => {
+const verificarUsuario = async (req, res) => {
     const {
         correo,
         contraseña
-    } = req.body;
+    } = req.body; // Extrae los datos del cuerpo de la solicitud
 
     try {
         // Buscar el usuario por correo
         const result = await pool.query(
-            'SELECT id_usuario,id_tipo_usuario,id nombre, correo, contraseña FROM Usuarios WHERE correo = $1',
+            'SELECT id_usuario, id_tipo_usuario, nombre, correo, contraseña FROM Usuarios WHERE correo = $1',
             [correo]
         );
 
+        // Verificar si el usuario existe
         if (result.rows.length === 0) {
             return res.status(404).json({
                 message: 'Usuario no encontrado'
@@ -719,6 +719,7 @@ const verificarUsuario = async () => {
 
         const usuario = result.rows[0];
 
+        // Comparar las contraseñas
         if (usuario.contraseña === contraseña) {
             return res.json({
                 success: true,
@@ -741,7 +742,6 @@ const verificarUsuario = async () => {
         });
     }
 };
-
 
 module.exports = {
     creartipoUsuario,
