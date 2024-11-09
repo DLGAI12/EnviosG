@@ -223,7 +223,8 @@ const crearUsuario = async (req, res, next) => {
         nombre,
         id_tipo_usuario,
         direccion,
-        contacto
+        correo,
+        contraseña,
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
@@ -237,8 +238,8 @@ const crearUsuario = async (req, res, next) => {
 
         // Si existe, procede con la inserción
         const result = await pool.query(
-            "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, contacto) VALUES ($1, $2, $3, $4) RETURNING *",
-            [nombre, id_tipo_usuario, direccion, contacto]
+            "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, $2, $3, $4,$5) RETURNING *",
+            [nombre, id_tipo_usuario, direccion, correo, contraseña]
         );
 
         res.json(result.rows[0]);
@@ -256,13 +257,13 @@ const actualizarUsuario = async (req, res, next) => {
         nombre,
         id_tipo_usuario,
         direccion,
-        contacto
+        correo
     } = req.body; // Obtener el nuevo nombre_tipo del cuerpo de la solicitud
 
     try {
         const result = await pool.query(
-            "UPDATE Usuarios SET nombre = $1 ,id_tipo_usuario=$2,direccion=$3,contacto=$4 WHERE id_usuario = $5",
-            [nombre, id_tipo_usuario, direccion, contacto, id_usuario]
+            "UPDATE Usuarios SET nombre = $1 ,id_tipo_usuario=$2,direccion=$3,correo=$4 WHERE id_usuario = $5",
+            [nombre, id_tipo_usuario, direccion, correo, id_usuario]
         );
 
         // Verifica si se actualizó algún registro
