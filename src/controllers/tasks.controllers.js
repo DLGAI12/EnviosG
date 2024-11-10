@@ -568,7 +568,7 @@ const pedidosXusuario = async (req, res, next) => {
     } = req.params;
 
     try {
-        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=$1', [id])
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=u.id and p.id_receptor=$1', [id])
 
         res.json(allTasks.rows)
     } catch (error) {
