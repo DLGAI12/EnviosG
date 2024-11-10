@@ -568,7 +568,7 @@ const pedidosXusuario = async (req, res, next) => {
     } = req.params;
 
     try {
-        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=u.id where p.id_receptor=$1', [id])
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=u.id_usuario where p.id_receptor=$1', [id])
 
         res.json(allTasks.rows)
     } catch (error) {
@@ -635,10 +635,9 @@ const crearMensaje = async (req, res, next) => {
 const pedidoscodigo = async (req, res, next) => {
     // Cambia esto para obtener el id de req.params
     const {
-        codigo_pedido
+        id
     } = req.params; // Ahora estás usando el parámetro de la URL
 
-    console.log(id); // Verifica que estás recibiendo el ID correcto
 
     try {
         const result = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [id]);
