@@ -428,7 +428,7 @@ const obtenerPedido = async (req, res, next) => {
     console.log(id); // Verifica que estás recibiendo el ID correcto
 
     try {
-        const result = await pool.query("SELECT * FROM Pedidos WHERE id_permisos = $1", [id]);
+        const result = await pool.query("SELECT * FROM Pedidos WHERE id_pedido = $1", [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).json({
