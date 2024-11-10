@@ -563,9 +563,12 @@ const quitarPermiso = async (req, res, next) => {
 
 
 const pedidosXusuario = async (req, res, next) => {
+    const {
+        id
+    } = req.params;
 
     try {
-        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=u.id_usuario')
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_receptor=$1', [id])
 
         res.json(allTasks.rows)
     } catch (error) {
