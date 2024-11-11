@@ -611,7 +611,7 @@ const crearMensaje = async (req, res, next) => {
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
-        const remitente = await pool.query("SELECT * FROM Usuarios WHERE id_tipo_usuario = $1", [id_remitente]);
+        const remitente = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_remitente]);
         const destinatario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_destinatario]);
         const pedido = await pool.query("SELECT * FROM Pedidos WHERE id_pedido = $1", [id_pedido]);
 
