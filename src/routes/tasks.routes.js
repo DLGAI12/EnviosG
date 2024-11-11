@@ -36,7 +36,8 @@ const {
     mensajesXremitente,
     mensajesXdestinatario,
     mensajesXpedido,
-    verificarUsuario
+    verificarUsuario,
+    pedidosXrepartidor,
 
 } = require('../controllers/tasks.controllers')
 
@@ -75,6 +76,7 @@ router.post('/mensajes', crearMensaje)
 router.get('/mensajesXpedido/:id', mensajesXpedido)
 router.post('/verificarUsuario', verificarUsuario)
 router.post('/login', verificarUsuario)
+router.get('/pedidosXrepartidor/:id', pedidosXrepartidor)
 module.exports = router;
 
 // fw4h0IvMUMhNLaCO contraselña de la base de datos

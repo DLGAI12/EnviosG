@@ -576,7 +576,26 @@ const pedidosXusuario = async (req, res, next) => {
         next(error)
     }
 
+
 }
+
+
+const pedidosXrepartidor = async (req, res, next) => {
+    const {
+        id
+    } = req.params;
+
+    try {
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_repartidor=u.id_usuario where p.id_repartidor=$1', [id])
+
+        res.json(allTasks.rows)
+    } catch (error) {
+
+        next(error)
+    }
+
+}
+
 
 const mensajesXremitente = async (req, res, next) => {
     // Cambia esto para obtener el id de req.params
@@ -777,5 +796,6 @@ module.exports = {
     mensajesXdestinatario,
     mensajesXremitente,
     verificarUsuario,
+    pedidosXrepartidor
 
 }
