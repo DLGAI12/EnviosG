@@ -370,7 +370,7 @@ const crearPedido = async (req, res, next) => {
 
         // Si existe, procede con la inserción
         const result = await pool.query(
-            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_usuario,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *",
+            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *",
             [codigo_pedido, id_receptor, id_usuario, estado_pedido, direccion_entrega, descripcion]
         );
 
