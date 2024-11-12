@@ -359,7 +359,7 @@ const crearPedido = async (req, res, next) => {
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
-        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id__usuario = $1", [id_receptor])
+        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor])
         const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
 
         if (receptor.rows.length === 0 && usuario.rows.length === 0) {
