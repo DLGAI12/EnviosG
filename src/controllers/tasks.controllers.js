@@ -349,7 +349,6 @@ const eliminarUsuario = async (req, res, next) => {
 
 const crearPedido = async (req, res, next) => {
     const {
-        nombre,
         codigo_pedido,
         id_receptor,
         id_usuario,
@@ -360,8 +359,8 @@ const crearPedido = async (req, res, next) => {
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
-        const receptor = await pool.query("SELECT * FROM TipoUsuario WHERE id_tipo_usuario = $1", [id_receptor])
-        const usuario = await pool.query("SELECT * FROM TipoUsuario WHERE id_tipo_usuario = $1", [id_usuario]);
+        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id__usuario = $1", [id_receptor])
+        const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
 
         if (receptor.rows.length === 0 && usuario.rows.length === 0) {
             return res.status(400).json({
@@ -371,8 +370,8 @@ const crearPedido = async (req, res, next) => {
 
         // Si existe, procede con la inserción
         const result = await pool.query(
-            "INSERT INTO Pedidos (nombre, codigo_pedido, id_receptor, id_usuario,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,$7) RETURNING *",
-            [nombre, codigo_pedido, id_receptor, id_usuario, estado_pedido, direccion_entrega, descripcion]
+            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_usuario,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,) RETURNING *",
+            [codigo_pedido, id_receptor, id_usuario, estado_pedido, direccion_entrega, descripcion]
         );
 
         res.json(result.rows[0]);
