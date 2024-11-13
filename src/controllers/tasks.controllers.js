@@ -420,7 +420,7 @@ const crearPedido = async (req, res, next) => {
 
         const correoExistente = await pool.query("SELECT id_usuario,id_tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
-        if (correoExistente.rows[0].tipo_usuario !== 1) {
+        if (correoExistente.rows[0].id_tipo_usuario !== 1) {
             return res.status(400).json({
                 message: 'El correo especificado no es de un receptor'
             });
