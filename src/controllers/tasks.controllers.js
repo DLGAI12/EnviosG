@@ -418,8 +418,6 @@ const crearPedido = async (req, res, next) => {
 
         const correoExistente = await pool.query("SELECT id_usuario,tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
-
-
         if (correoExistente.rows[0].tipo_usuario !== 1) {
             return res.status(400).json({
                 message: 'El correo especificado no es de un receptor'
@@ -436,7 +434,7 @@ const crearPedido = async (req, res, next) => {
             let idReceptor;
             if (correoExistente.rows.length === 0) {
                 const nuevoUsuario = await pool.query(
-                    "INSERT INTO Usuarios (nombre, id_tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
+                    "INSERT INTO Usuarios (nombre, tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
                     [nombre_receptor, correo, claveAleatoria]
                 );
                 idReceptor = nuevoUsuario.rows[0].id_usuario;
