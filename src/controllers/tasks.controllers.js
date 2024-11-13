@@ -415,8 +415,7 @@ const crearPedido = async (req, res, next) => {
         }
 
 
-        const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
-        const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
+
         const correoExistente = await pool.query("SELECT id_usuario,tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
 
