@@ -38,6 +38,9 @@ const {
     mensajesXpedido,
     verificarUsuario,
     pedidosXrepartidor,
+    pedidosXempresa,
+    obtenerNombreRepartidores,
+    obtenernombreUsuario,
 
 } = require('../controllers/tasks.controllers')
 
@@ -77,6 +80,11 @@ router.get('/mensajesXpedido/:id', mensajesXpedido)
 router.post('/verificarUsuario', verificarUsuario)
 router.post('/login', verificarUsuario)
 router.get('/pedidosXrepartidor/:id', pedidosXrepartidor)
+
+router.get('/pedidosXempresa/:id', pedidosXempresa)
+router.get('/nombreRepartidores', obtenerNombreRepartidores)
+router.get('/nombreUsuario/:id', obtenernombreUsuario)
+//Actualizado el crear usuario
 module.exports = router;
 
 // fw4h0IvMUMhNLaCO contraselña de la base de datos

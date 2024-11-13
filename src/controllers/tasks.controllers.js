@@ -229,7 +229,12 @@ const crearUsuario = async (req, res, next) => {
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
         const tipoUsuario = await pool.query("SELECT * FROM TipoUsuario WHERE id_tipo_usuario = $1", [id_tipo_usuario]);
-
+        const correos = await pool.query("SELECT * FROM Usuarios WHERE correo = $1", [correo]);
+        if (correos.rows.length > 0) {
+            return res.status(400).json({
+                message: 'El correo ya existe.'
+            });
+        }
         if (tipoUsuario.rows.length === 0) {
             return res.status(400).json({
                 message: 'El tipo de usuario especificado no existe.'
@@ -348,33 +353,80 @@ const eliminarUsuario = async (req, res, next) => {
 //Pedidos
 
 const crearPedido = async (req, res, next) => {
+    const longitud = 8; // Cambia esto a la longitud que desees
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const claveAleatoria = Array.from({
+        length: longitud
+    }, () => caracteres.charAt(Math.floor(Math.random() * caracteres.length))).join('');
+
     const {
         codigo_pedido,
         id_receptor,
         id_usuario,
+        id_empresa,
         estado_pedido,
         direccion_entrega,
-        descripcion
+        descripcion,
+        nombre,
+        correo
+
+
 
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
         const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor])
         const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
+        const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
+        const correos = await pool.query("SELECT * FROM Usuarios WHERE correo = $1", [correo]);
+        const idCorreo = await pool.query("SELECT id_usuario FROM Usuarios WHERE correo = $1", [correo]);
+        const codigo_pedido = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo_pedido]);
 
-        if (receptor.rows.length === 0 && usuario.rows.length === 0) {
+
+        if (codigo_pedido.rows.length > 0) {
+            return res.status(400).json({
+                message: 'El codigo de pedido ya existe.'
+            });
+        }
+
+        if (correos.rows.length === 0) {
+            const result1 = await pool.query(
+                "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, 1,$2,$3) RETURNING *",
+                [nombre, correos, claveAleatoria]
+            );
+
+            res.json(result1.rows[0], "Correo enviado con exito");
+
+
+
+            // Si existe, procede con la inserción
+            const result = await pool.query(
+
+                "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,id_empresa,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,$7) RETURNING *",
+                [codigo_pedido, id_receptor, idCorreo, id_empresa, estado_pedido, direccion_entrega, descripcion]
+            );
+            res.json(result.rows[0]);
+        } else {
+            const result = await pool.query(
+
+                "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,id_empresa,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,$7) RETURNING *",
+                [codigo_pedido, id_receptor, id_usuario, id_empresa, estado_pedido, direccion_entrega, descripcion]
+            );
+            res.json(result.rows[0]);
+        }
+
+
+        if (receptor.rows.length === 0 && usuario.rows.length === 0 && empresa.rows.length === 0) {
             return res.status(400).json({
                 message: 'El tipo de usuario especificado no existe.'
             });
         }
 
-        // Si existe, procede con la inserción
-        const result = await pool.query(
-            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6) RETURNING *",
-            [codigo_pedido, id_receptor, id_usuario, estado_pedido, direccion_entrega, descripcion]
-        );
 
-        res.json(result.rows[0]);
+
+
+
+
     } catch (error) {
         next(error);
     }
@@ -578,6 +630,22 @@ const pedidosXusuario = async (req, res, next) => {
 
 }
 
+const pedidosXempresa = async (req, res, next) => {
+    const {
+        id
+    } = req.params;
+
+    try {
+        const allTasks = await pool.query('select * from Pedidos p  join Usuarios u ON p.id_empresa=u.id_usuario where p.id_empresa=$1', [id])
+
+        res.json(allTasks.rows)
+    } catch (error) {
+
+        next(error)
+    }
+
+
+}
 
 const pedidosXrepartidor = async (req, res, next) => {
     const {
@@ -763,6 +831,43 @@ const verificarUsuario = async (req, res) => {
     }
 };
 
+const obtenerNombreRepartidores = async (req, res, next) => {
+
+    try {
+        const allTasks = await pool.query('select nombre from Usuarios where id_tipo_usuario=3')
+
+        res.json(allTasks.rows)
+    } catch (error) {
+
+        next(error)
+    }
+
+}
+
+const obtenernombreUsuario = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        id
+    } = req.params; // Ahora estás usando el parámetro de la URL
+
+    console.log(id); // Verifica que estás recibiendo el ID correcto
+
+    try {
+        const result = await pool.query("SELECT nombre FROM Usuarios WHERE id_usuario = $1", [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        res.json(result.rows[0]); // Devuelve el primer resultado encontrado
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
+
+
 module.exports = {
     creartipoUsuario,
     obtenertipoUsuarios,
@@ -795,6 +900,9 @@ module.exports = {
     mensajesXdestinatario,
     mensajesXremitente,
     verificarUsuario,
-    pedidosXrepartidor
+    pedidosXrepartidor,
+    pedidosXempresa,
+    obtenerNombreRepartidores,
+    obtenernombreUsuario
 
 }
