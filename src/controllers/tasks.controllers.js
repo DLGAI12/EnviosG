@@ -402,6 +402,8 @@ const crearPedido = async (req, res, next) => {
         id_empresa,
 
     } = req.body;
+    //cambios
+
 
     try {
         // Verificación de existencia del código de pedido y usuarios
