@@ -414,7 +414,7 @@ const crearPedido = async (req, res, next) => {
             });
         }
 
-        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor]);
+
         const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
         const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
         const correoExistente = await pool.query("SELECT id_usuario,tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
@@ -426,11 +426,12 @@ const crearPedido = async (req, res, next) => {
                 message: 'El correo especificado no es de un receptor'
             });
         } else {
-            if (receptor.rows.length === 0 || usuario.rows.length === 0 || empresa.rows.length === 0) {
+            if (usuario.rows.length === 0 || empresa.rows.length === 0) {
                 return res.status(400).json({
                     message: 'Uno o más usuarios especificados no existen.'
                 });
             }
+
 
             // Inserción del nuevo usuario si no existe el correo
             let idReceptor;
