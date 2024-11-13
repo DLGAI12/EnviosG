@@ -385,7 +385,7 @@ const eliminarUsuario = async (req, res, next) => {
 //Pedidos
 
 const crearPedido = async (req, res, next) => {
-    const longitud = 8; // Cambia esto a la longitud que desees
+    const longitud = 8;
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
     const claveAleatoria = Array.from({
         length: longitud
@@ -401,63 +401,50 @@ const crearPedido = async (req, res, next) => {
         descripcion,
         nombre,
         correo
+    } = req.body;
 
-
-    } = req.body
     try {
-        // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
-        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor])
+        // Verificación de existencia del código de pedido y usuarios
+        const codigoPedidoExistente = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo]);
+        if (codigoPedidoExistente.rows.length > 0) {
+            return res.status(400).json({
+                message: 'El código de pedido ya existe.'
+            });
+        }
+
+        const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor]);
         const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
         const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
-        const correos = await pool.query("SELECT * FROM Usuarios WHERE correo = $1", [correo]);
-        const idCorreo = await pool.query("SELECT id_usuario FROM Usuarios WHERE correo = $1", [correo]);
-        const codigo_pedido = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo]);
+        const correoExistente = await pool.query("SELECT id_usuario FROM Usuarios WHERE correo = $1", [correo]);
 
-
-        if (codigo_pedido.rows.length > 0) {
+        if (receptor.rows.length === 0 || usuario.rows.length === 0 || empresa.rows.length === 0) {
             return res.status(400).json({
-                message: 'El codigo de pedido ya existe.'
+                message: 'Uno o más usuarios especificados no existen.'
             });
         }
 
-        if (correos.rows.length === 0) {
-            const result1 = await pool.query(
-                "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, 1,$2,$3) RETURNING *",
-                [nombre, correos, claveAleatoria]
+        // Inserción del nuevo usuario si no existe el correo
+        let idRepartidor;
+        if (correoExistente.rows.length === 0) {
+            const nuevoUsuario = await pool.query(
+                "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, 1, $2, $3, $4) RETURNING id_usuario",
+                [nombre, direccion_entrega, correo, claveAleatoria]
             );
-
-            res.json(result1.rows[0], "Correo enviado con exito");
-
-
-
-            // Si existe, procede con la inserción
-            const result = await pool.query(
-
-                "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,id_empresa,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,$7) RETURNING *",
-                [codigo_pedido, id_receptor, idCorreo, id_empresa, estado_pedido, direccion_entrega, descripcion]
-            );
-            res.json(result.rows[0]);
+            idRepartidor = nuevoUsuario.rows[0].id_usuario;
         } else {
-            const result = await pool.query(
-
-                "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor,id_empresa,estado_pedido,direccion_entrega,descripcion) VALUES ($1, $2, $3, $4,$5,$6,$7) RETURNING *",
-                [codigo_pedido, id_receptor, id_usuario, id_empresa, estado_pedido, direccion_entrega, descripcion]
-            );
-            res.json(result.rows[0]);
+            idRepartidor = correoExistente.rows[0].id_usuario;
         }
 
+        // Inserción del pedido
+        const nuevoPedido = await pool.query(
+            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            [codigo, id_receptor, idRepartidor, id_empresa, estado_pedido, direccion_entrega, descripcion]
+        );
 
-        if (receptor.rows.length === 0 && usuario.rows.length === 0 && empresa.rows.length === 0) {
-            return res.status(400).json({
-                message: 'El tipo de usuario especificado no existe.'
-            });
-        }
-
-
-
-
-
-
+        res.json({
+            pedido: nuevoPedido.rows[0],
+            message: "Pedido y usuario creados exitosamente, correo enviado"
+        });
     } catch (error) {
         next(error);
     }
