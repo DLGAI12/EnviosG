@@ -41,6 +41,7 @@ const {
     pedidosXempresa,
     obtenerNombreRepartidores,
     obtenernombreUsuario,
+    actualizarUsuarioContraseña,
 
 } = require('../controllers/tasks.controllers')
 
@@ -84,6 +85,7 @@ router.get('/pedidosXrepartidor/:id', pedidosXrepartidor)
 router.get('/pedidosXempresa/:id', pedidosXempresa)
 router.get('/nombreRepartidores', obtenerNombreRepartidores)
 router.get('/nombreUsuario/:id', obtenernombreUsuario)
+router.put('/actualizarUsuarioContraseña/:id', actualizarUsuarioContraseña)
 //Actualizado el crear usuario
 module.exports = router;
 

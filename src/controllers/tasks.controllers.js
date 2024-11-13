@@ -287,6 +287,37 @@ const actualizarUsuario = async (req, res, next) => {
     }
 };
 
+const actualizarUsuarioContraseña = async (req, res, next) => {
+    const {
+        id_usuario
+    } = req.params; // Obtener el ID del permiso a actualizar
+    const {
+        nombre,
+        contraseña
+
+    } = req.body; // Obtener el nuevo nombre_tipo del cuerpo de la solicitud
+
+    try {
+        const result = await pool.query(
+            "UPDATE Usuarios SET nombre = $1 ,contraseña =$2 WHERE id_usuario = $3",
+            [nombre, contraseña, id_usuario]
+        );
+
+        // Verifica si se actualizó algún registro
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        // Responde con un mensaje de éxito
+        res.json({
+            message: 'Permiso actualizado con éxito'
+        });
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
 
 const obtenerUsuario = async (req, res, next) => {
     // Cambia esto para obtener el id de req.params
@@ -903,6 +934,7 @@ module.exports = {
     pedidosXrepartidor,
     pedidosXempresa,
     obtenerNombreRepartidores,
-    obtenernombreUsuario
+    obtenernombreUsuario,
+    actualizarUsuarioContraseña,
 
 }
