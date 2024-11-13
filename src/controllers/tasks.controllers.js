@@ -393,14 +393,14 @@ const crearPedido = async (req, res, next) => {
 
     const {
         codigo,
-        id_receptor,
-        id_usuario,
-        id_empresa,
+        nombre_receptor,
+        correo_receptor,
+        id_repartidor,
         estado_pedido,
         direccion_entrega,
         descripcion,
-        nombre,
-        correo
+        id_empresa,
+
     } = req.body;
 
     try {
@@ -415,36 +415,48 @@ const crearPedido = async (req, res, next) => {
         const receptor = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_receptor]);
         const usuario = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_usuario]);
         const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
-        const correoExistente = await pool.query("SELECT id_usuario FROM Usuarios WHERE correo = $1", [correo]);
+        const correoExistente = await pool.query("SELECT id_usuario,tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
-        if (receptor.rows.length === 0 || usuario.rows.length === 0 || empresa.rows.length === 0) {
+
+
+        if (correoExistente.rows[0].tipo_usuario !== 1) {
             return res.status(400).json({
-                message: 'Uno o más usuarios especificados no existen.'
+                message: 'El correo especificado no es de un receptor'
             });
-        }
-
-        // Inserción del nuevo usuario si no existe el correo
-        let idRepartidor;
-        if (correoExistente.rows.length === 0) {
-            const nuevoUsuario = await pool.query(
-                "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, 1, $2, $3, $4) RETURNING id_usuario",
-                [nombre, direccion_entrega, correo, claveAleatoria]
-            );
-            idRepartidor = nuevoUsuario.rows[0].id_usuario;
         } else {
-            idRepartidor = correoExistente.rows[0].id_usuario;
+            if (receptor.rows.length === 0 || usuario.rows.length === 0 || empresa.rows.length === 0) {
+                return res.status(400).json({
+                    message: 'Uno o más usuarios especificados no existen.'
+                });
+            }
+
+            // Inserción del nuevo usuario si no existe el correo
+            let idReceptor;
+            if (correoExistente.rows.length === 0) {
+                const nuevoUsuario = await pool.query(
+                    "INSERT INTO Usuarios (nombre, id_tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
+                    [nombre_receptor, correo, claveAleatoria]
+                );
+                idReceptor = nuevoUsuario.rows[0].id_usuario;
+
+            } else {
+                idReceptor = correoExistente.rows[0].id_usuario;
+            }
+
+
+            const nuevoPedido = await pool.query(
+                "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+                [codigo, idReceptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion]
+            );
+
+            res.json({
+                pedido: nuevoPedido.rows[0],
+                message: "Pedido y usuario creados exitosamente, correo enviado"
+            });
+
+
+
         }
-
-        // Inserción del pedido
-        const nuevoPedido = await pool.query(
-            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-            [codigo, id_receptor, idRepartidor, id_empresa, estado_pedido, direccion_entrega, descripcion]
-        );
-
-        res.json({
-            pedido: nuevoPedido.rows[0],
-            message: "Pedido y usuario creados exitosamente, correo enviado"
-        });
     } catch (error) {
         next(error);
     }
