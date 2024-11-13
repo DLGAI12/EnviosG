@@ -358,6 +358,7 @@ const eliminarUsuario = async (req, res, next) => {
     const {
         id
     } = req.params; // Obtener el ID del permiso a eliminar
+    //Cambi
 
     try {
         const result = await pool.query(
