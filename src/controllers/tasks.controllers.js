@@ -403,7 +403,6 @@ const crearPedido = async (req, res, next) => {
         correo
 
 
-
     } = req.body
     try {
         // Verifica si el id_tipo_usuario existe en la tabla TipoUsuario
