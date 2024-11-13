@@ -405,7 +405,9 @@ const crearPedido = async (req, res, next) => {
 
     try {
         // Verificación de existencia del código de pedido y usuarios
-        const codigoPedidoExistente = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo]);
+        const codigoPedidoExistente = await pool.query("SELECT codigo_pedido FROM Pedidos WHERE codigo_pedido = $1", [codigo]);
+        console.log(codigoPedidoExistente.rows);
+
         if (codigoPedidoExistente.rows.length > 0) {
             return res.status(400).json({
                 message: 'El código de pedido ya existe.'
