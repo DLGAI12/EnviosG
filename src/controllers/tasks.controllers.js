@@ -866,7 +866,7 @@ const verificarUsuario = async (req, res) => {
 const obtenerNombreRepartidores = async (req, res, next) => {
 
     try {
-        const allTasks = await pool.query('select nombre from Usuarios where id_tipo_usuario=3')
+        const allTasks = await pool.query('select nombre from Usuarios where id_tipo_usuario=2')
 
         res.json(allTasks.rows)
     } catch (error) {
