@@ -434,7 +434,7 @@ const crearPedido = async (req, res, next) => {
             let idReceptor;
             if (correoExistente.rows.length === 0) {
                 const nuevoUsuario = await pool.query(
-                    "INSERT INTO Usuarios (nombre, tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
+                    "INSERT INTO Usuarios (nombre,id_tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3)",
                     [nombre_receptor, correo, claveAleatoria]
                 );
                 idReceptor = nuevoUsuario.rows[0].id_usuario;
