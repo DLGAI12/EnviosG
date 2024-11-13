@@ -392,7 +392,7 @@ const crearPedido = async (req, res, next) => {
     }, () => caracteres.charAt(Math.floor(Math.random() * caracteres.length))).join('');
 
     const {
-        codigo_pedido,
+        codigo,
         id_receptor,
         id_usuario,
         id_empresa,
@@ -412,7 +412,7 @@ const crearPedido = async (req, res, next) => {
         const empresa = await pool.query("SELECT * FROM Usuarios WHERE id_usuario = $1", [id_empresa]);
         const correos = await pool.query("SELECT * FROM Usuarios WHERE correo = $1", [correo]);
         const idCorreo = await pool.query("SELECT id_usuario FROM Usuarios WHERE correo = $1", [correo]);
-        const codigo_pedido = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo_pedido]);
+        const codigo_pedido = await pool.query("SELECT * FROM Pedidos WHERE codigo_pedido = $1", [codigo]);
 
 
         if (codigo_pedido.rows.length > 0) {
