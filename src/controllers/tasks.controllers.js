@@ -1,5 +1,15 @@
 const pool = require('../db')
+const nodemailer = require('nodemailer');
 
+// Configura el transporte
+require('dotenv').config();
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD
+    }
+});
 const creartipoUsuario = async (req, res, next) => {
     const {
         nombre_tipo
@@ -243,8 +253,8 @@ const crearUsuario = async (req, res, next) => {
 
         // Si existe, procede con la inserción
         const result = await pool.query(
-            "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña) VALUES ($1, $2, $3, $4,$5) RETURNING *",
-            [nombre, id_tipo_usuario, direccion, correo, contraseña]
+            "INSERT INTO Usuarios (nombre, id_tipo_usuario, direccion, correo, contraseña,status) VALUES ($1, $2, $3, $4,$5) RETURNING *",
+            [nombre, id_tipo_usuario, direccion, correo, contraseña, true]
         );
 
         res.json(result.rows[0]);
@@ -383,7 +393,23 @@ const eliminarUsuario = async (req, res, next) => {
 }
 
 //Pedidos
+const enviarCorreo = async (destinatario, asunto, mensaje) => {
+    try {
+        const info = await transporter.sendMail({
+            from: '"GuanabanaEnvios" <enviosguanabana@gmail.com>', // Remitente
+            to: destinatario, // Destinatario
+            subject: asunto, // Asunto
+            text: mensaje, // Texto del correo
+            html: `<p>${mensaje}</p>` // Formato HTML opcional
+        });
 
+        console.log('Correo enviado:', info.messageId);
+        return info;
+    } catch (error) {
+        console.error('Error al enviar correo:', error);
+        throw error;
+    }
+};
 const crearPedido = async (req, res, next) => {
     const longitud = 8;
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -415,12 +441,19 @@ const crearPedido = async (req, res, next) => {
         const correoExistente = await pool.query("SELECT id_usuario, id_tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
         if (correoExistente.rows.length === 0) {
-            // Si el correo no existe, crear el receptor con el tipo de usuario correspondiente
+            // Si el correo no existe, crear el receptor con el tipo de usuario correspondiente y enviar correo
             const nuevoUsuario = await pool.query(
                 "INSERT INTO Usuarios (nombre, id_tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
                 [nombre_receptor, correo_receptor, claveAleatoria]
             );
             idReceptor = nuevoUsuario.rows[0].id_usuario;
+            enviarCorreo(correo_receptor, 'Bienvenido a GuanabanaEnvios', `Hola ${nombre_receptor}, tu contraseña temporal es: ${claveAleatoria}`);
+
+            //Actualizar estado del usuario 
+            await pool.query("UPDATE Usuarios SET status = false WHERE id_usuario = $1", [idReceptor]);
+
+
+
         } else {
             // Si el correo existe, verificar que es un receptor (id_tipo_usuario = 1)
             if (correoExistente.rows[0].id_tipo_usuario !== 1) {
@@ -433,7 +466,7 @@ const crearPedido = async (req, res, next) => {
 
         // Creación del pedido
         const nuevoPedido = await pool.query(
-            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion,status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
             [codigo, idReceptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion]
         );
 
