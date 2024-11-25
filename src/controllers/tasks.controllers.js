@@ -880,7 +880,32 @@ const obtenernombreUsuario = async (req, res, next) => {
         next(error); // Maneja el error
     }
 };
+const verificarPedido = async (req, res, next) => {
+    // Cambia esto para obtener el id de req.params
+    const {
+        id,
+        codigo_pedido
+    } = req.body; // Ahora estás usando el parámetro de la URL
 
+    try {
+        // Consulta a la base de datos
+        const result = await pool.query(
+            "SELECT * FROM pedidos WHERE id_pedido= $1 and codigo_pedido = $2",
+            [id, codigo_pedido]
+        );
+
+        // Devuelve true o false dependiendo de si encontró el registro
+        const encontrado = result.rows.length > 0;
+
+        // Respuesta JSON con el estado
+        res.json({
+            encontrado, // Devuelve true o false
+            datos: encontrado ? result.rows[0] : null, // Si existe, devuelve el registro, si no, null
+        });
+    } catch (error) {
+        next(error); // Maneja errores con middleware
+    }
+};
 
 module.exports = {
     creartipoUsuario,
@@ -906,7 +931,6 @@ module.exports = {
     asignarPermiso,
     permisosxtipousuario,
     quitarPermiso,
-
     pedidosXusuario,
     pedidoscodigo,
     crearMensaje,
@@ -919,5 +943,6 @@ module.exports = {
     obtenerNombreRepartidores,
     obtenernombreUsuario,
     actualizarUsuarioContraseña,
+    verificarPedido
 
 }
