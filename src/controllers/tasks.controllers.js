@@ -422,7 +422,6 @@ const crearPedido = async (req, res, next) => {
         nombre_receptor,
         correo_receptor,
         id_repartidor,
-        estado_pedido,
         direccion_entrega,
         descripcion,
         id_empresa
@@ -437,28 +436,30 @@ const crearPedido = async (req, res, next) => {
             });
         }
 
-        // Verificación de existencia del correo y tipo de usuario
+        // Verificación de existencia del correo
         const correoExistente = await pool.query("SELECT id_usuario, id_tipo_usuario FROM Usuarios WHERE correo = $1", [correo_receptor]);
 
+        let idReceptor;
+
         if (correoExistente.rows.length === 0) {
-            // Si el correo no existe, crear el receptor con el tipo de usuario correspondiente y enviar correo
+            // Si el correo no existe, crear el receptor
             const nuevoUsuario = await pool.query(
                 "INSERT INTO Usuarios (nombre, id_tipo_usuario, correo, contraseña) VALUES ($1, 1, $2, $3) RETURNING id_usuario",
                 [nombre_receptor, correo_receptor, claveAleatoria]
             );
             idReceptor = nuevoUsuario.rows[0].id_usuario;
-            //enviarCorreo(correo_receptor, 'Bienvenido a GuanabanaEnvios', `Hola ${nombre_receptor}, tu contraseña temporal es: ${claveAleatoria}`);
 
-            //Actualizar estado del usuario 
+            // Enviar correo de bienvenida
+            // enviarCorreo(correo_receptor, 'Bienvenido a GuanabanaEnvios', `Hola ${nombre_receptor}, tu contraseña temporal es: ${claveAleatoria}`);
+
+            // Actualizar estado del usuario
             await pool.query("UPDATE Usuarios SET status = false WHERE id_usuario = $1", [idReceptor]);
-
-
 
         } else {
             // Si el correo existe, verificar que es un receptor (id_tipo_usuario = 1)
             if (correoExistente.rows[0].id_tipo_usuario !== 1) {
                 return res.status(400).json({
-                    message: 'El correo especificado no es de un receptor'
+                    message: 'El correo especificado no es de un receptor válido.'
                 });
             }
             idReceptor = correoExistente.rows[0].id_usuario;
@@ -466,13 +467,17 @@ const crearPedido = async (req, res, next) => {
 
         // Creación del pedido
         const nuevoPedido = await pool.query(
-            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion,status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-            [codigo, idReceptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion]
+            "INSERT INTO Pedidos (codigo_pedido, id_receptor, id_repartidor, id_empresa, estado_pedido, direccion_entrega, descripcion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            [codigo, idReceptor, id_repartidor, id_empresa, "En proceso", direccion_entrega, descripcion]
         );
+
+        const mensajeRespuesta = correoExistente.rows.length === 0 ?
+            "Pedido y usuario creados exitosamente. Correo enviado." :
+            "Pedido creado exitosamente. Usuario ya existente.";
 
         res.json({
             pedido: nuevoPedido.rows[0],
-            message: "Pedido y usuario creados exitosamente, correo enviado"
+            message: mensajeRespuesta
         });
 
     } catch (error) {
