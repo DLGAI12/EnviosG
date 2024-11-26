@@ -914,36 +914,32 @@ const obtenernombreUsuario = async (req, res, next) => {
     }
 };
 const verificarPedido = async (req, res, next) => {
-    // Cambia esto para obtener el id de req.params
     const {
         id,
         codigo_pedido
-    } = req.body; // Ahora estás usando el parámetro de la URL
+    } = req.body; // Obtén los datos del cuerpo de la solicitud
 
     try {
-        // Consulta a la base de datos
+        // Intentar actualizar el pedido y verificar si fue exitoso
         const result = await pool.query(
-            "SELECT * FROM pedidos WHERE id_pedido= $1 and codigo_pedido = $2",
-            [id, codigo_pedido]
+            "UPDATE pedidos SET estado_pedido = $1 WHERE id_pedido = $2 AND codigo_pedido = $3 RETURNING *",
+            ['Entregado', id, codigo_pedido]
         );
 
-        // Devuelve true o false dependiendo de si encontró el registro
         const encontrado = result.rows.length > 0;
 
-        // Respuesta JSON con el estado
+        // Respuesta al cliente
         res.json({
-            encontrado, // Devuelve true o false
-            datos: encontrado ?
-                await pool.query(
-                    "UPDATE pedidos SET estado_pedido = $1 WHERE id_pedido = $2",
-                    ['Entregado', id_pedido] // Asegúrate de tener el ID correcto
-                ) : null
+            encontrado, // true o false
+            datos: encontrado ? result.rows[0] : 'Pedido no encontrado',
         });
     } catch (error) {
-        next(error); // Maneja errores con middleware
+        console.error('Error en verificarPedido:', error);
+        res.status(500).json({
+            error: 'Ocurrió un error al procesar la solicitud.'
+        });
     }
 };
-
 module.exports = {
     creartipoUsuario,
     obtenertipoUsuarios,
