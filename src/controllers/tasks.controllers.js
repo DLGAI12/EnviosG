@@ -319,13 +319,14 @@ const actualizarContrasena = async (req, res, next) => {
 
     const {
         contraseña,
-        correo
+        correo,
+        id_usuario
     } = req.body; // Obtener el nuevo nombre_tipo del cuerpo de la solicitud
 
     try {
         const result = await pool.query(
-            "UPDATE Usuarios SET contraseña = $1, status=$2 WHERE correo = $3 ",
-            [contraseña, true, correo]
+            "UPDATE Usuarios SET contraseña = $1, status=$2 WHERE correo = $3 and id_usuario=$4 ",
+            [contraseña, true, correo, id_usuario]
         );
 
         // Verifica si se actualizó algún registro
