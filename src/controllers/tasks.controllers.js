@@ -976,6 +976,7 @@ module.exports = {
     obtenerNombreRepartidores,
     obtenernombreUsuario,
     actualizarUsuarioContraseña,
-    verificarPedido
+    verificarPedido,
+    enviarCorreo
 
 }
