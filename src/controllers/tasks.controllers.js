@@ -933,7 +933,11 @@ const verificarPedido = async (req, res, next) => {
         // Respuesta JSON con el estado
         res.json({
             encontrado, // Devuelve true o false
-            datos: encontrado ? result.rows[0] : null, // Si existe, devuelve el registro, si no, null
+            datos: encontrado ?
+                await pool.query(
+                    "UPDATE pedidos SET estado_pedido = $1 WHERE id_pedido = $2",
+                    ['Entregado', id_pedido] // Asegúrate de tener el ID correcto
+                ) : null
         });
     } catch (error) {
         next(error); // Maneja errores con middleware
