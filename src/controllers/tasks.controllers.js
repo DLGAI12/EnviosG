@@ -898,7 +898,8 @@ const verificarUsuario = async (req, res) => {
                     id: usuario.id_usuario,
                     nombre: usuario.nombre,
                     correo: usuario.correo,
-                    id_tipo_usuario: usuario.id_tipo_usuario
+                    id_tipo_usuario: usuario.id_tipo_usuario,
+                    status: usuario.status
                 }
             });
         } else {
