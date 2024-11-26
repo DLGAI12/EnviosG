@@ -393,7 +393,7 @@ const eliminarUsuario = async (req, res, next) => {
 }
 
 //Pedidos
-/*const enviarCorreo = async (destinatario, asunto, mensaje) => {
+const enviarCorreo = async (destinatario, asunto, mensaje) => {
     try {
         const info = await transporter.sendMail({
             from: '"GuanabanaEnvios" <enviosguanabana@gmail.com>', // Remitente
@@ -409,7 +409,7 @@ const eliminarUsuario = async (req, res, next) => {
         console.error('Error al enviar correo:', error);
         throw error;
     }
-};*/
+};
 const crearPedido = async (req, res, next) => {
     const longitud = 8;
     const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
