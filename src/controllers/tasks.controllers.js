@@ -980,24 +980,33 @@ const verificarPedido = async (req, res, next) => {
 };
 const actualizarestadoPedido = async (req, res, next) => {
     const {
-        id_pedido
-    } = req.params; // Obtener el ID del permiso a actualizar
+        id
+    } = req.params; // Obtener el ID del pedido a actualizar
+    console.log('ID Pedido:', id); // Verifica que el id esté llegando
+
+    // Validación: Si no se recibe un id_pedido
+    if (!id) {
+        return res.status(400).json({
+            message: 'El ID del pedido es requerido'
+        });
+    }
+
     try {
         const result = await pool.query(
             "UPDATE Pedidos SET estado_pedido=$1 WHERE id_pedido = $2",
-            ['En proceso', id_pedido]
+            ['En proceso', id]
         );
 
         // Verifica si se actualizó algún registro
         if (result.rowCount === 0) {
             return res.status(404).json({
-                message: 'No se encontró ningún tipo de usuario'
+                message: 'No se encontró el pedido con el ID proporcionado'
             });
         }
 
         // Responde con un mensaje de éxito
         res.json({
-            message: 'Permiso actualizado con éxito'
+            message: 'Estado del pedido actualizado con éxito'
         });
     } catch (error) {
         next(error); // Maneja el error
