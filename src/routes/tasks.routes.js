@@ -43,7 +43,8 @@ const {
     obtenernombreUsuario,
     actualizarUsuarioContraseña,
     verificarPedido,
-    actualizarContrasena
+    actualizarContrasena,
+    actualizarestadoPedido
 
 } = require('../controllers/tasks.controllers')
 
@@ -90,6 +91,7 @@ router.get('/nombreUsuario/:id', obtenernombreUsuario)
 router.put('/actualizarUsuarioContraseña/:id', actualizarUsuarioContraseña)
 router.post('/verificarPedido', verificarPedido)
 router.put('/actualizarContrasena', actualizarContrasena)
+router.put('/actualizarestadoPedido/:id', actualizarestadoPedido)
 //Actualizado el crear usuario
 module.exports = router;
 
