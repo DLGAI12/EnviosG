@@ -978,6 +978,31 @@ const verificarPedido = async (req, res, next) => {
         });
     }
 };
+const actualizarestadoPedido = async (req, res, next) => {
+    const {
+        id_pedido
+    } = req.params; // Obtener el ID del permiso a actualizar
+    try {
+        const result = await pool.query(
+            "UPDATE Pedidos SET estado_pedido=$1 WHERE id_pedido = $2",
+            ['En proceso', id_pedido]
+        );
+
+        // Verifica si se actualizó algún registro
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: 'No se encontró ningún tipo de usuario'
+            });
+        }
+
+        // Responde con un mensaje de éxito
+        res.json({
+            message: 'Permiso actualizado con éxito'
+        });
+    } catch (error) {
+        next(error); // Maneja el error
+    }
+};
 module.exports = {
     creartipoUsuario,
     obtenertipoUsuarios,
@@ -1019,29 +1044,3 @@ module.exports = {
     actualizarestadoPedido
 
 }
-
-const actualizarestadoPedido = async (req, res, next) => {
-    const {
-        id_pedido
-    } = req.params; // Obtener el ID del permiso a actualizar
-    try {
-        const result = await pool.query(
-            "UPDATE Pedidos SET estado_pedido=$1 WHERE id_pedido = $2",
-            ['En proceso', id_pedido]
-        );
-
-        // Verifica si se actualizó algún registro
-        if (result.rowCount === 0) {
-            return res.status(404).json({
-                message: 'No se encontró ningún tipo de usuario'
-            });
-        }
-
-        // Responde con un mensaje de éxito
-        res.json({
-            message: 'Permiso actualizado con éxito'
-        });
-    } catch (error) {
-        next(error); // Maneja el error
-    }
-};
