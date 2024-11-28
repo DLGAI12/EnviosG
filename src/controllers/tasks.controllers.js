@@ -1,7 +1,6 @@
 const pool = require('../db')
 const nodemailer = require('nodemailer');
 
-
 // Configurar el transporter de nodemailer
 const transporter = nodemailer.createTransport({
     service: 'gmail', // Usamos Gmail (puedes cambiarlo por otro servicio si prefieres)
