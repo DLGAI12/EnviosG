@@ -55,7 +55,7 @@ app.use((err, req, res, next) => {
         message: err.message
     })
 })
-const PORT = 4000;
+const PORT = 8080;
 server.listen(PORT, () => {
     console.log(`Servidor Express con WebSocket escuchando en http://localhost:${PORT}`);
 });
