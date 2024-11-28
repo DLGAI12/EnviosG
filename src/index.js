@@ -7,9 +7,7 @@ const cors = require('cors');
 const morgan = require("morgan")
 const taskRoutes = require('./routes/tasks.routes.js')
 const server = require('http').createServer(app);
-const wss = new WebSocket.Server({
-    server
-});
+const ws = new WebSocket('wss://enviosg-1.onrender.com')
 wss.on('connection', (ws) => {
     console.log('Nuevo cliente conectado');
 
